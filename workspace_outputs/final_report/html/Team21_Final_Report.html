@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<title>Team21 FactoryVision Final Report</title>
+<style>
+@page {
+  size: A4;
+  margin: 18mm 16mm 18mm 16mm;
+}
+* { box-sizing: border-box; }
+body {
+  font-family: "Microsoft JhengHei", "PingFang TC", "Noto Sans CJK TC", "Segoe UI", Arial, sans-serif;
+  color: #1f2937;
+  font-size: 9.8pt;
+  line-height: 1.62;
+  margin: 0;
+  padding: 0;
+}
+.report-header {
+  border-bottom: 2px solid #1e293b;
+  padding-bottom: 10px;
+  margin-bottom: 14px;
+}
+.report-header .course-tag {
+  font-size: 8.5pt;
+  color: #475569;
+  margin-bottom: 4px;
+}
+.report-header h1 {
+  margin: 0 0 6px 0;
+  font-size: 16.5pt;
+  font-weight: 700;
+  color: #0f172a;
+}
+.report-header .author-line {
+  font-size: 9pt;
+  color: #334155;
+  margin: 0;
+}
+.summary-strip {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 0 14px 0;
+  font-size: 8.8pt;
+}
+.summary-strip td {
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  padding: 6px 10px;
+  text-align: left;
+  width: 25%;
+}
+.summary-strip .lbl {
+  display: block;
+  font-size: 7.8pt;
+  color: #64748b;
+}
+.summary-strip .val {
+  display: block;
+  font-size: 10.2pt;
+  font-weight: 700;
+  color: #0f172a;
+  margin-top: 2px;
+}
+h2 {
+  font-size: 12.2pt;
+  color: #0f172a;
+  border-bottom: 1.5px solid #94a3b8;
+  padding-bottom: 3px;
+  margin: 15px 0 8px 0;
+  page-break-after: avoid;
+}
+h3 {
+  font-size: 10.5pt;
+  color: #1e293b;
+  margin: 11px 0 5px 0;
+  page-break-after: avoid;
+}
+p { margin: 5px 0 8px 0; text-align: justify; }
+ul, ol { margin: 4px 0 8px 0; padding-left: 20px; }
+li { margin-bottom: 4px; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 8px 0 12px 0;
+  font-size: 8.5pt;
+  page-break-inside: avoid;
+}
+table.allow-split {
+  page-break-inside: auto;
+}
+thead { display: table-header-group; }
+tr { page-break-inside: avoid; break-inside: avoid; }
+th, td {
+  border: 1px solid #cbd5e1;
+  padding: 5px 6px;
+  text-align: center;
+  vertical-align: middle;
+}
+th {
+  background: #f1f5f9;
+  color: #0f172a;
+  font-weight: 700;
+}
+td.left, th.left { text-align: left; }
+tr:nth-child(even) td { background: #fafafa; }
+tr.highlight td { background: #eef6ff !important; font-weight: 700; }
+.note-box {
+  background: #f8fafc;
+  border-left: 3.5px solid #475569;
+  padding: 8px 12px;
+  margin: 8px 0 12px 0;
+  page-break-inside: avoid;
+}
+figure {
+  margin: 8px 0 12px 0;
+  text-align: center;
+  page-break-inside: avoid;
+}
+figure img {
+  max-width: 100%;
+  height: auto;
+  border: 1px solid #e2e8f0;
+}
+figcaption {
+  font-size: 8.4pt;
+  color: #475569;
+  margin-top: 4px;
+}
+code {
+  font-family: Consolas, "Courier New", monospace;
+  background: #f1f5f9;
+  padding: 1px 4px;
+  border-radius: 2px;
+  font-size: 8.4pt;
+}
+.page-break { page-break-before: always; }
+.badge-pending {
+  display: inline-block;
+  background: #fef3c7;
+  color: #92400e;
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-weight: 700;
+  font-size: 8.2pt;
+}
+</style>
+</head>
+<body>
+
+<div class="report-header">
+  <div class="course-tag">影像識別期末專題總結報告｜FactoryVision Challenge</div>
+  <h1>智慧工廠鋼材表面瑕疵辨識與定位系統 — 期末報告</h1>
+  <p class="author-line">組別：Team21｜隨機種子：42</p>
+</div>
+
+<table class="summary-strip">
+  <tr>
+    <td><span class="lbl">Stage 1 最終模型</span><span class="val">E4 (Val F1=1.0000)</span></td>
+    <td><span class="lbl">Stage 2 最終模型</span><span class="val">E6 (Robust=0.994)</span></td>
+    <td><span class="lbl">Stage 3 最終模型</span><span class="val">Faster R-CNN (mAP=0.7866)</span></td>
+    <td><span class="lbl">資料切分規範</span><span class="val">Master Split / Seed=42</span></td>
+  </tr>
+</table>
+
+<h2>1. Problem &amp; Dataset（問題背景與資料集特性）</h2>
+<p>本專題模擬智慧製造鋼材產線的表面瑕疵檢測問題，系統除了要分辨六類瑕疵（<code>crazing</code> 龜裂、<code>inclusion</code> 夾雜、<code>patches</code> 斑塊、<code>pitted_surface</code> 點蝕、<code>rolled_in_scale</code> 氧化鐵皮壓入、<code>scratches</code> 刮痕），還需進一步標出瑕疵座標，並考量實際工廠的光照變化、模糊、壓縮雜訊與運算成本。</p>
+<ul>
+  <li><b>資料切分與規範</b>：課程提供 <code>FactoryVision_STUDENT_PUBLIC</code>，Classification 與 Detection 共用相同的 Master Split：<b>Train = 1,260</b>（每類 210 張）、<b>Validation = 270</b>（每類 45 張）。所有實驗固定 <code>seed = 42</code>，禁用外部微調權重，Validation 僅用來挑模型與調參。</li>
+  <li><b>三階段分工</b>：<b>Stage 1</b> 先用傳統特徵與自己刻的 CNN 驗證基本方法；<b>Stage 2</b> 系統性比較兩種預訓練骨幹在不同微調策略下的抗干擾表現；<b>Stage 3</b> 則進入 Bounding-Box 偵測，比較單階段與雙階段模型的定位準度與模型複雜度。</li>
+  <li><b>我們觀察到的資料特性（200×200 影像）</b>：統計標註檔後發現六類瑕疵大小落差很大——<code>inclusion</code> 中位寬只有 <code>23 px</code>、<code>scratches</code> 細長、<code>pitted_surface</code> 與 <code>crazing</code> 則常佔滿整張圖；另外全資料集中共有 <b>104 張圖同時存在一種以上的瑕疵</b>，這也是為什麼最後實務上必須走向 Object Detection。</li>
+</ul>
+
+<h2>2. Stage 1：Baseline 與 Improved CNN</h2>
+<p>先看傳統方法：將灰階圖縮成 <code>64×64</code> 做標準化與 <code>PCA(0.95)</code>（保留 33 維主成分，解釋 95.03% 變異）後，<code>PCA + KNN</code> 只拿到 Val Macro F1 = <b>0.6302</b>，<code>PCA + SVM (RBF)</code> 提升到 <b>0.7546</b> 但對細長紋理仍常誤判。接著我們自己設計四層卷積的 <code>SteelDefectCNN</code>（421,990 參數，從頭訓練 80 epochs），做 E1–E5 消融實驗。有趣的是 E1–E5 在潔淨驗證集最後都達到 1.0000，因此我們另外做了 ±15°／±20% 亮度對比的偏移診斷（Mild-Shift Probe），才明顯看出 <code>E4 (BN + DataAug)</code> 的抗偏移能力最好（<code>1.0000</code> vs. E1 <code>0.2907</code>）：</p>
+<table>
+  <thead>
+    <tr><th class="left">模型 / 實驗組別</th><th>Val Acc</th><th>Val Macro F1</th><th>Best Val Loss</th><th>Mild-Shift Gen F1</th><th>Final Overfit Gap (F1)</th></tr>
+  </thead>
+  <tbody><tr><td class='left'>PCA + KNN (k=5)</td><td>0.6370</td><td><b>0.6302</b></td><td>-</td><td><b>-</b></td><td>+0.3698</td></tr><tr><td class='left'>PCA + SVM (RBF)</td><td>0.7556</td><td><b>0.7546</b></td><td>-</td><td><b>-</b></td><td>+0.0883</td></tr><tr><td class='left'>E1: Baseline CNN</td><td>1.0000</td><td><b>1.0000</b></td><td>0.02629</td><td><b>0.2907</b></td><td>+0.0013</td></tr><tr><td class='left'>E2: +BN (Method A)</td><td>1.0000</td><td><b>1.0000</b></td><td>0.00493</td><td><b>0.5573</b></td><td>+0.0087</td></tr><tr><td class='left'>E3: +Aug (Method B)</td><td>1.0000</td><td><b>1.0000</b></td><td>0.00348</td><td><b>0.9852</b></td><td>+0.0021</td></tr><tr class='highlight'><td class='left'>E4: +BN+Aug (A+B)</td><td>1.0000</td><td><b>1.0000</b></td><td>0.00481</td><td><b>1.0000</b></td><td>+0.0005</td></tr><tr><td class='left'>E5: +BN+Aug+Reg (C)</td><td>1.0000</td><td><b>1.0000</b></td><td>0.01364</td><td><b>0.9888</b></td><td>-0.0030</td></tr></tbody>
+</table>
+<figure><img src='file:///D:/data/%E5%BD%B1%E5%83%8F%E8%AD%98%E5%88%A5%E6%9C%9F%E6%9C%AB%E5%A0%B1%E5%91%8A/workspace_outputs/stage1/figs/fig2_stage1_comparison_bar.png' style='max-height:250px;' /><figcaption>圖 1：Stage 1 傳統方法與自建 CNN E1–E5 消融實驗對照。</figcaption></figure>
+
+<h2>3. Stage 2：Transfer Learning 與 Robustness 挑戰</h2>
+<p>我們執行 <b>DenseNet121</b> 與 <b>MobileNetV3-Large</b> 兩架構家族搭配三種策略（<code>Feature Extraction</code>、<code>Partial Fine-tuning</code>、<code>Full Fine-tuning</code>）之 2×3 公平對照，並導入本地合成之 <code>Lighting</code>、<code>Optical Blur</code> 與 <code>Sensor + JPEG</code> 壓力測試評估環境強健性：</p>
+<table>
+  <thead>
+    <tr><th>ID</th><th class="left">Architecture</th><th class="left">Strategy</th><th>Clean F1</th><th>Lighting</th><th>Optical</th><th>Sensor/JPEG</th><th>Local Robust F1</th><th>Size</th></tr>
+  </thead>
+  <tbody><tr><td>E1</td><td class='left'>densenet121</td><td class='left'>feature_extraction</td><td>0.9926</td><td>0.9590</td><td>0.8816</td><td>0.8158</td><td><b>0.8855</b></td><td>27.1 MB</td></tr><tr><td>E2</td><td class='left'>densenet121</td><td class='left'>partial_finetuning</td><td>1.0000</td><td>0.9889</td><td>0.9738</td><td>0.9815</td><td><b>0.9814</b></td><td>27.1 MB</td></tr><tr><td>E3</td><td class='left'>densenet121</td><td class='left'>full_finetuning</td><td>1.0000</td><td>0.9814</td><td>0.9926</td><td>0.9963</td><td><b>0.9901</b></td><td>27.1 MB</td></tr><tr><td>E4</td><td class='left'>mobilenet_v3_large</td><td class='left'>feature_extraction</td><td>1.0000</td><td>0.9778</td><td>0.9550</td><td>0.9112</td><td><b>0.9480</b></td><td>16.2 MB</td></tr><tr><td>E5</td><td class='left'>mobilenet_v3_large</td><td class='left'>partial_finetuning</td><td>1.0000</td><td>0.9815</td><td>0.9926</td><td>0.9521</td><td><b>0.9754</b></td><td>16.2 MB</td></tr><tr class='highlight'><td>E6</td><td class='left'>mobilenet_v3_large</td><td class='left'>full_finetuning</td><td>1.0000</td><td>0.9852</td><td>1.0000</td><td>0.9963</td><td><b>0.9938</b></td><td>16.2 MB</td></tr></tbody>
+</table>
+<figure><img src='file:///D:/data/%E5%BD%B1%E5%83%8F%E8%AD%98%E5%88%A5%E6%9C%9F%E6%9C%AB%E5%A0%B1%E5%91%8A/workspace_outputs/stage2/figs/fig2_stage2_robustness_bar.png' style='max-height:275px;' /><figcaption>圖 2：Stage 2 六組遷移學習實驗之 Clean 與三項本地 Robustness 測試結果。</figcaption></figure>
+
+<h2>4. Stage 3：Object Detection 瑕疵定位與工程比較</h2>
+<p>我們於相同切分下訓練並以 Slide-31 Pascal VOC 2010+ 定義統一評估單階段 Anchor-free（<code>YOLO11s</code>、<code>YOLO11m</code>）與雙階段 Anchor-based（<code>Faster R-CNN ResNet50-FPN-v2</code>）檢測器：</p>
+<table>
+  <thead>
+    <tr><th class="left">Detector</th><th>mAP@0.5 (c=0.01)</th><th>mAP@0.5 (c=0.25)</th><th>Precision (c=0.25)</th><th>Recall (c=0.25)</th><th>Size</th></tr>
+  </thead>
+  <tbody><tr><td class='left'>YOLO11S</td><td><b>0.7413</b></td><td>0.6313</td><td>0.7095</td><td>0.6973</td><td>18.3 MB</td></tr><tr><td class='left'>YOLO11M</td><td><b>0.7603</b></td><td>0.6474</td><td>0.7417</td><td>0.6989</td><td>38.7 MB</td></tr><tr class='highlight'><td class='left'>Faster R-CNN ResNet50-FPN-v2</td><td><b>0.7866</b></td><td>0.7574</td><td>0.5041</td><td>0.8534</td><td>165.5 MB</td></tr></tbody>
+</table>
+<p>最終選定 <b>Faster R-CNN ResNet50-FPN-v2</b>（提交設定：<code>confidence_threshold=0.01</code>、<code>nms_iou_threshold=0.5</code>），於驗證集達成 <b>mAP@0.5 = 0.7866</b>（操作門檻 <code>conf=0.25</code> 下 Precision = <b>0.5041</b>、Recall = <b>0.8534</b>），權重檔案大小為 <b>165.5 MB</b>。</p>
+<figure><img src='file:///D:/data/%E5%BD%B1%E5%83%8F%E8%AD%98%E5%88%A5%E6%9C%9F%E6%9C%AB%E5%A0%B1%E5%91%8A/workspace_outputs/stage3/figs/fig1_stage3_detector_comparison.png' style='max-height:265px;' /><figcaption>圖 3：Stage 3 三種目標檢測器之逐類 AP@0.5 與整體 mAP@0.5 比較。</figcaption></figure>
+
+<div class="page-break"></div>
+
+<h2>5. Failure Analysis（跨 Stage 主要錯誤案例與根本成因）</h2>
+<ul>
+  <li><b>1. 跨類別紋理混淆與資料增強消融診斷（Stage 1）</b>：<code>PCA + SVM</code> 在細長或點狀紋理上嚴重失誤，<code>inclusion</code>（F1 = 0.58）與 <code>scratches</code>（F1 = 0.66）常相互混淆；自建 CNN 雖在潔淨驗證集達 1.0000，但在 ±15° / ±20% 亮度對比偏移診斷中，無增強基準 <code>E1</code> 急劇崩跌至 <b>0.2907</b>、僅加 BN 之 <code>E2</code> 僅 <b>0.5573</b>，直到結合 BN 與資料增強（<code>E4</code>）才維持 <b>1.0000</b> 抗偏移穩定度。</li>
+  <li><b>2. 光照與壓縮雜訊對 Frozen Feature Extraction 的衝擊（Stage 2）</b>：僅訓練分類頭時，預訓練淺層濾波器對鋼材高頻壓縮失真脆弱，<code>DenseNet121 FE (E1)</code> 於 <code>Sensor/JPEG</code> 跌至 <b>0.8158</b>（Overall Robust = <b>0.8855</b>）；經統一 Robustness-Aware 增強與全層微調後，<code>E6 (MobileNetV3-Large Full FT)</code> 達成 Clean <b>1.0000</b> 與 Local Robust <b>0.9938</b>（全測試 810 張僅 5 筆誤判）。</li>
+  <li><b>3. 空間定位難類、小目標漏檢與多標籤結構瓶頸（Stage 3）</b>：即便最強檢測器 <code>Faster R-CNN R50-FPN-v2</code>，於瀰漫低對比之 <code>crazing</code>（AP = <b>0.5093</b>）與 <code>rolled_in_scale</code>（AP = <b>0.6692</b>）仍常見 Poor Localization（<code>IoU &lt; 0.5</code>），微小型 <code>inclusion</code>（中位寬 23 px）偶發 FN；此外資料集共含 <b>104 張複合瑕疵影像</b>，Stage 1–2 單標籤模型結構上無法輸出第二類別，唯有 Stage 3 檢測器能精準解析複合瑕疵空間分布。</li>
+</ul>
+<figure><img src='file:///D:/data/%E5%BD%B1%E5%83%8F%E8%AD%98%E5%88%A5%E6%9C%9F%E6%9C%AB%E5%A0%B1%E5%91%8A/workspace_outputs/stage3/figs/fig5_stage3_failure_cases.png' style='max-height:470px;' /><figcaption>圖 4：Stage 3 代表性 False Positive / False Negative / Poor Localization 錯誤案例視覺化。</figcaption></figure>
+
+<h2>6. Deployment Decision（跨階段量化權衡與工廠部署決策）</h2>
+<table>
+  <thead>
+    <tr><th class="left">候選系統方案</th><th>任務能力</th><th>核心指標 (Val)</th><th>抗干擾性</th><th>模型大小</th><th class="left">產線工程評價</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="left">Traditional: PCA + SVM</td><td>僅單標籤分類</td><td>F1 = 0.7546</td><td>極低</td><td>&lt; 1 MB</td>
+      <td class="left">僅適合作為極簡基準，精度不足以部署</td>
+    </tr>
+    <tr>
+      <td class="left">Stage 1: E4 (From Scratch)</td><td>僅單標籤分類</td><td>F1 = 1.0000</td><td>中低</td><td>1.62 MB</td>
+      <td class="left">極輕量架構，適合低成本粗篩，但缺乏空間定位能力</td>
+    </tr>
+    <tr>
+      <td class="left">Stage 2: E6 (MobileNetV3-L Full FT)</td><td>單標籤分類 + 抗干擾</td><td>Clean=1.0000<br>Robust=0.9938</td><td><b>極高</b></td><td>16.24 MB</td>
+      <td class="left">強大抗光照/模糊/壓縮與輕量特性，適合惡劣成像複檢與邊緣機台</td>
+    </tr>
+    <tr>
+      <td class="left">Stage 3 Tier-Fast: YOLO11m</td><td>分類 + 定位 + 多目標</td><td>mAP@0.5 = 0.7603</td><td>中高</td><td>38.7 MB</td>
+      <td class="left"><b>輕量定位首選</b>：參數與檔案顯著較小，適合資源受限的主產線工位</td>
+    </tr>
+    <tr class="highlight">
+      <td class="left">Stage 3 Tier-Precision: Faster R-CNN ResNet50-FPN-v2</td><td><b>最高精度定位 + 多目標</b></td><td>mAP@0.5 = <b>0.7866</b></td><td>高</td><td>165.5 MB</td>
+      <td class="left"><b>高精品檢首選</b>：<code>crazing</code> 與 <code>rolled_in_scale</code> 表現最佳，適合品管複檢工位</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>7. Conclusion（最終 FactoryVision 系統部署建議）</h2>
+<div class="note-box">
+  <b>最終系統決策：依照產線工位需求採用「YOLO11m（輕量定位主線）＋ Faster R-CNN R50-FPN-v2（高精複檢站）＋ MobileNetV3-Large E6（惡劣成像備援）」</b>
+  <ol>
+    <li><b>高精確度定位主模型</b>：若目標是最大化偵測準確度與召回率（例如品管站或離線複檢），我會選擇 <b>Stage 3 Faster R-CNN ResNet50-FPN-v2</b>（驗證集 <code>mAP@0.5 = 0.7866</code>，檔案 165.5 MB），它在難檢的 <code>crazing</code> 與 <code>rolled_in_scale</code> 上表現明顯優於單階段模型，也能處理複合瑕疵影像。</li>
+    <li><b>輕量多目標定位工位</b>：若產線邊緣設備受限於模型容量與記憶體，實務上可採用同實驗證過的 <b>YOLO11m</b>（<code>mAP@0.5 = 0.7603</code>、檔案僅 38.7 MB）做第一線定位篩檢，有疑似框再送交 Faster R-CNN 複核。</li>
+    <li><b>強干擾環境與低資源分類備援</b>：當鏡頭油霧／強光閃爍嚴重或僅需整張圖分類把關時，改以 <b>Stage 2 E6（MobileNetV3-Large Full Fine-tuning）</b>（僅 <b>16.24 MB</b>、Local Robust Macro F1 = <b>0.9938</b>）作為備援；產線告警門檻建議設於 <code>conf = 0.25–0.30</code>，兼顧低誤報與高召回。</li>
+  </ol>
+</div>
+
+</body>
+</html>

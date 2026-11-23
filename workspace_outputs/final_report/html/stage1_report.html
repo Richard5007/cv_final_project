@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<title>Team21 Stage 1 Report</title>
+<style>
+@page {
+  size: A4;
+  margin: 18mm 16mm 18mm 16mm;
+}
+* { box-sizing: border-box; }
+body {
+  font-family: "Microsoft JhengHei", "PingFang TC", "Noto Sans CJK TC", "Segoe UI", Arial, sans-serif;
+  color: #1f2937;
+  font-size: 9.8pt;
+  line-height: 1.62;
+  margin: 0;
+  padding: 0;
+}
+.report-header {
+  border-bottom: 2px solid #1e293b;
+  padding-bottom: 10px;
+  margin-bottom: 14px;
+}
+.report-header .course-tag {
+  font-size: 8.5pt;
+  color: #475569;
+  margin-bottom: 4px;
+}
+.report-header h1 {
+  margin: 0 0 6px 0;
+  font-size: 16.5pt;
+  font-weight: 700;
+  color: #0f172a;
+}
+.report-header .author-line {
+  font-size: 9pt;
+  color: #334155;
+  margin: 0;
+}
+.summary-strip {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 0 14px 0;
+  font-size: 8.8pt;
+}
+.summary-strip td {
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  padding: 6px 10px;
+  text-align: left;
+  width: 25%;
+}
+.summary-strip .lbl {
+  display: block;
+  font-size: 7.8pt;
+  color: #64748b;
+}
+.summary-strip .val {
+  display: block;
+  font-size: 10.2pt;
+  font-weight: 700;
+  color: #0f172a;
+  margin-top: 2px;
+}
+h2 {
+  font-size: 12.2pt;
+  color: #0f172a;
+  border-bottom: 1.5px solid #94a3b8;
+  padding-bottom: 3px;
+  margin: 15px 0 8px 0;
+  page-break-after: avoid;
+}
+h3 {
+  font-size: 10.5pt;
+  color: #1e293b;
+  margin: 11px 0 5px 0;
+  page-break-after: avoid;
+}
+p { margin: 5px 0 8px 0; text-align: justify; }
+ul, ol { margin: 4px 0 8px 0; padding-left: 20px; }
+li { margin-bottom: 4px; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 8px 0 12px 0;
+  font-size: 8.5pt;
+  page-break-inside: avoid;
+}
+table.allow-split {
+  page-break-inside: auto;
+}
+thead { display: table-header-group; }
+tr { page-break-inside: avoid; break-inside: avoid; }
+th, td {
+  border: 1px solid #cbd5e1;
+  padding: 5px 6px;
+  text-align: center;
+  vertical-align: middle;
+}
+th {
+  background: #f1f5f9;
+  color: #0f172a;
+  font-weight: 700;
+}
+td.left, th.left { text-align: left; }
+tr:nth-child(even) td { background: #fafafa; }
+tr.highlight td { background: #eef6ff !important; font-weight: 700; }
+.note-box {
+  background: #f8fafc;
+  border-left: 3.5px solid #475569;
+  padding: 8px 12px;
+  margin: 8px 0 12px 0;
+  page-break-inside: avoid;
+}
+figure {
+  margin: 8px 0 12px 0;
+  text-align: center;
+  page-break-inside: avoid;
+}
+figure img {
+  max-width: 100%;
+  height: auto;
+  border: 1px solid #e2e8f0;
+}
+figcaption {
+  font-size: 8.4pt;
+  color: #475569;
+  margin-top: 4px;
+}
+code {
+  font-family: Consolas, "Courier New", monospace;
+  background: #f1f5f9;
+  padding: 1px 4px;
+  border-radius: 2px;
+  font-size: 8.4pt;
+}
+.page-break { page-break-before: always; }
+.badge-pending {
+  display: inline-block;
+  background: #fef3c7;
+  color: #92400e;
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-weight: 700;
+  font-size: 8.2pt;
+}
+</style>
+</head>
+<body>
+
+<div class="report-header">
+  <div class="course-tag">影像識別期末專題報告｜FactoryVision Challenge — Stage 1</div>
+  <h1>Stage 1：傳統基準方法與自建 CNN 消融實驗</h1>
+  <p class="author-line">組別：Team21｜隨機種子：42</p>
+</div>
+
+<table class="summary-strip">
+  <tr>
+    <td><span class="lbl">最終選定模型</span><span class="val">E4 (BN + DataAug)</span></td>
+    <td><span class="lbl">Validation Macro F1</span><span class="val">1.0000</span></td>
+    <td><span class="lbl">Mild-Shift 偏移診斷 F1</span><span class="val">1.0000</span></td>
+    <td><span class="lbl">參數量 / 檔案大小</span><span class="val">421,990 / 1.62 MB</span></td>
+  </tr>
+</table>
+
+<h2>1. 資料規範與實驗設計</h2>
+<p>Stage 1 的目標是從頭建立鋼材表面瑕疵分類的基準線，並驗證常見的訓練改善技巧是否真的有效。為了確保比較公平，本階段僅使用 <code>Classification Public Dataset</code>（Train = 1,260 張，每類 210 張；Validation = 270 張，每類 45 張），固定 <code>seed = 42</code>，也不使用任何預訓練權重或現成骨幹（如 ResNet、VGG、MobileNet）。所有影像統一轉為 <code>200×200</code> 單通道灰階，並以訓練集統計量 <code>mean = [0.5071]</code>、<code>std = [0.2132]</code> 做標準化。</p>
+
+<h2>2. Part A：Traditional Baselines（PCA + SVM / PCA + KNN）</h2>
+<p>在寫 CNN 之前，我們先用傳統機器學習方法當作基準。作法是將灰階影像縮成 <code>64×64</code>（4,096 維向量），只在訓練集上擬合 <code>StandardScaler</code> 與保留 95% 變異量的 <code>PCA(n_components=0.95)</code>（實際保留 <b>33</b> 維主成分，累積解釋變異量為 <b>95.03%</b>），接著分別訓練 <code>RBF-SVM (C=10.0, gamma='scale')</code> 與 <code>KNN (k=5, distance weighting)</code>。</p>
+<table>
+  <thead>
+    <tr><th class="left">傳統基準方法</th><th>PCA 維度</th><th>Train Acc</th><th>Val Accuracy</th><th>Val Precision</th><th>Val Recall</th><th>Val Macro F1</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="left"><b>PCA + SVM (RBF)</b></td>
+      <td>33</td>
+      <td>0.8437</td>
+      <td>0.7556</td>
+      <td>0.7824</td>
+      <td>0.7556</td>
+      <td><b>0.7546</b></td>
+    </tr>
+    <tr>
+      <td class="left"><b>PCA + KNN (k=5)</b></td>
+      <td>33</td>
+      <td>1.0000</td>
+      <td>0.6370</td>
+      <td>0.7015</td>
+      <td>0.6370</td>
+      <td><b>0.6302</b></td>
+    </tr>
+  </tbody>
+</table>
+<p>從結果來看，<code>PCA + SVM</code>（Macro F1 = <b>0.7546</b>）比 <code>PCA + KNN</code>（<b>0.6302</b>）好不少，但兩者都明顯受限：特別是 <code>PCA + KNN</code> 在訓練集拿到 1.0000、驗證集卻掉到 0.6370，而 <code>PCA + SVM</code> 對細長紋理（<code>inclusion</code> F1 = 0.5843、<code>scratches</code> F1 = 0.6571）也常誤判。這主要是因為直接把影像拉平做全域 PCA 會破壞局部空間結構與平移不變性。</p>
+
+<h2>3. Self-Designed Baseline CNN 架構與訓練設定</h2>
+<p>我們自己設計了一個四層的輕量卷積網路 <code>SteelDefectCNN</code>：包含 4 個卷積區塊（通道數 <code>1 → 32 → 64 → 128 → 256</code>，皆為 <code>3×3</code> kernel、<code>padding=1</code>、<code>Kaiming Normal</code> 初始化與 <code>ReLU</code>），前 3 個區塊接 <code>MaxPool2d(2×2)</code>（解析度由 <code>200 → 100 → 50 → 25</code>），第 4 個區塊後接 <code>AdaptiveAvgPool2d(1×1)</code>，最後以 <code>Linear(256→128) → ReLU → (可選 Dropout) → Linear(128→6)</code> 輸出分類結果。</p>
+<ul>
+  <li><b>Baseline（E1）前處理</b>：僅使用 <code>Resize(200, 200) → ToTensor() → Normalize([0.5071], [0.2132])</code>。</li>
+  <li><b>固定訓練參數</b>：<code>Adam(lr=1e-3)</code>、<code>Batch Size = 32</code>、<code>Epochs = 80</code>、<code>CrossEntropyLoss</code>、<code>Seed = 42</code>。</li>
+</ul>
+
+<div class="page-break"></div>
+
+<h2>4. Part B：Improvement Methods 與消融實驗（Ablation Study）</h2>
+<p>為了看清楚每個改善方法的獨立效果，我們以 <code>E1</code> 為基準，依序測試以下三組設定（E1–E5）：</p>
+<ul>
+  <li><b>Method A（Batch Normalization）</b>：在每個 <code>Conv2d</code> 後面加上 <code>BatchNorm2d</code>（同時關閉 conv bias），幫助深層特徵分佈穩定。</li>
+  <li><b>Method B（Data Augmentation）</b>：訓練時加入隨機水平翻轉（<code>p=0.5</code>）、垂直翻轉（<code>p=0.5</code>）、旋轉（<code>±15°</code>）與亮度對比調整（<code>ColorJitter(brightness=0.2, contrast=0.2)</code>）。</li>
+  <li><b>Method C（Regularization + Early Stopping）</b>：分類頭加入 <code>Dropout(p=0.3)</code>、優化器設定 <code>weight_decay=1e-4</code>，並以 Validation Macro F1 監控 <code>Early Stopping(patience=20)</code>。</li>
+</ul>
+
+<table>
+  <thead>
+    <tr>
+      <th class="left">實驗組別</th><th>Method A<br>(BN)</th><th>Method B<br>(Aug)</th><th>Method C<br>(Drop/L2/ES)</th>
+      <th>Best / Ran<br>Epoch</th><th>Val Acc</th><th>Val<br>Macro F1</th><th>Best Val<br>Loss</th>
+      <th>Last-10<br>Val F1</th><th>Mild-Shift<br>Gen F1</th><th>Final Overfit<br>Gap (F1)</th><th>訓練時間</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td class='left'><b>E1</b>: Baseline CNN</td><td>&#10005;</td><td>&#10005;</td><td>&#10005;</td><td>47/80</td><td>1.0000</td><td><b>1.0000</b></td><td>0.02629</td><td>0.9874</td><td><b>0.2907</b></td><td>+0.0013</td><td>153.8s</td></tr><tr><td class='left'><b>E2</b>: Baseline + A (BatchNorm)</td><td>&#10003;</td><td>&#10005;</td><td>&#10005;</td><td>76/80</td><td>1.0000</td><td><b>1.0000</b></td><td>0.00493</td><td>0.9895</td><td><b>0.5573</b></td><td>+0.0087</td><td>179.9s</td></tr><tr><td class='left'><b>E3</b>: Baseline + B (DataAug)</td><td>&#10005;</td><td>&#10003;</td><td>&#10005;</td><td>72/80</td><td>1.0000</td><td><b>1.0000</b></td><td>0.00348</td><td>0.9869</td><td><b>0.9852</b></td><td>+0.0021</td><td>200.3s</td></tr><tr class='highlight'><td class='left'><b>E4</b>: Baseline + A + B (BN + DataAug)</td><td>&#10003;</td><td>&#10003;</td><td>&#10005;</td><td>67/80</td><td>1.0000</td><td><b>1.0000</b></td><td>0.00481</td><td>0.9915</td><td><b>1.0000</b></td><td>+0.0005</td><td>224.3s</td></tr><tr><td class='left'><b>E5</b>: Baseline + A + B + C (BN + DataAug + Dropout + L2 + ES)</td><td>&#10003;</td><td>&#10003;</td><td>&#10003;</td><td>46/66</td><td>1.0000</td><td><b>1.0000</b></td><td>0.01364</td><td>0.9840</td><td><b>0.9888</b></td><td>-0.0030</td><td>185.7s</td></tr>
+  </tbody>
+</table>
+
+<figure><img src='file:///D:/data/%E5%BD%B1%E5%83%8F%E8%AD%98%E5%88%A5%E6%9C%9F%E6%9C%AB%E5%A0%B1%E5%91%8A/workspace_outputs/stage1/figs/fig1_stage1_ablation_curves.png' style='max-height:430px;' /><figcaption>圖 1：E1–E5 訓練與驗證收斂曲線（Loss 與 Macro F1）。加入 BatchNorm (E2/E4/E5) 顯著加速收斂並壓低驗證震盪。</figcaption></figure>
+<figure><img src='file:///D:/data/%E5%BD%B1%E5%83%8F%E8%AD%98%E5%88%A5%E6%9C%9F%E6%9C%AB%E5%A0%B1%E5%91%8A/workspace_outputs/stage1/figs/fig2_stage1_comparison_bar.png' style='max-height:310px;' /><figcaption>圖 2：Traditional Baselines 與 E1–E5 CNN 之 Validation Macro F1 與 Accuracy 比較。</figcaption></figure>
+
+<div class="page-break"></div>
+
+<h2>5. 混淆矩陣、逐類分析與 Final Model 選擇理由</h2>
+<figure><img src='file:///D:/data/%E5%BD%B1%E5%83%8F%E8%AD%98%E5%88%A5%E6%9C%9F%E6%9C%AB%E5%A0%B1%E5%91%8A/workspace_outputs/stage1/figs/fig3_stage1_confusion_matrices.png' style='max-height:280px;' /><figcaption>圖 3：PCA+SVM、E1 Baseline CNN 與最終選定 Improved CNN 之驗證集混淆矩陣對照。</figcaption></figure>
+<figure><img src='file:///D:/data/%E5%BD%B1%E5%83%8F%E8%AD%98%E5%88%A5%E6%9C%9F%E6%9C%AB%E5%A0%B1%E5%91%8A/workspace_outputs/stage1/figs/fig4_stage1_per_class_f1.png' style='max-height:280px;' /><figcaption>圖 4：各缺陷類別 F1 分數對比（PCA+SVM vs. Baseline CNN vs. Final Improved CNN）。</figcaption></figure>
+
+<table>
+  <thead>
+    <tr><th class="left">缺陷類別</th><th>PCA + SVM F1</th><th>E1 Baseline F1</th><th>E4 Precision</th><th>E4 Recall</th><th>E4 F1</th><th>Support</th></tr>
+  </thead>
+  <tbody>
+    <tr><td class='left'><code>crazing</code></td><td>0.7273</td><td>1.0000</td><td>1.0000</td><td>1.0000</td><td><b>1.0000</b></td><td>45</td></tr><tr><td class='left'><code>inclusion</code></td><td>0.5843</td><td>1.0000</td><td>1.0000</td><td>1.0000</td><td><b>1.0000</b></td><td>45</td></tr><tr><td class='left'><code>patches</code></td><td>0.9888</td><td>1.0000</td><td>1.0000</td><td>1.0000</td><td><b>1.0000</b></td><td>45</td></tr><tr><td class='left'><code>pitted_surface</code></td><td>0.8913</td><td>1.0000</td><td>1.0000</td><td>1.0000</td><td><b>1.0000</b></td><td>45</td></tr><tr><td class='left'><code>rolled_in_scale</code></td><td>0.6786</td><td>1.0000</td><td>1.0000</td><td>1.0000</td><td><b>1.0000</b></td><td>45</td></tr><tr><td class='left'><code>scratches</code></td><td>0.6571</td><td>1.0000</td><td>1.0000</td><td>1.0000</td><td><b>1.0000</b></td><td>45</td></tr>
+  </tbody>
+</table>
+
+<div class="note-box">
+  <b>Final Improved CNN 選擇理由（選定 E4）</b>：
+  <ul>
+    <li><b>為什麼在 Clean Val 都拿 1.0000 的情況下還要比較？</b> 一開始跑完 E1–E5 時我們有點意外，五組在 270 張潔淨驗證集上最佳檢查點都達到 <code>1.0000</code>。但如果只看最高 F1 其實分不出好壞，所以我們進一步檢查收斂速度、Validation Loss 與偏移泛化力：
+      (1) 單加 <b>BatchNorm（E2）</b> 讓最佳 Val Loss 從 E1 的 <code>0.02629</code> 降到 <code>0.00493</code>，且第 19 epoch 就突破 0.98 F1（E1 要到第 24 epoch）；
+      (2) 單加 <b>Data Augmentation（E3）</b> 把 Val Loss 降到 <code>0.00348</code>，同時在輕微旋轉／亮度偏移診斷（Mild-Shift Probe）中把 F1 從無增強組的 <code>0.2907</code>（E1）與 <code>0.5573</code>（E2）拉高到 <b>0.9852</b>。</li>
+    <li><b>最終選擇 E4（A + B 結合）</b>：<code>E4</code> 在第 <b>14</b> epoch 就達到 0.98 F1（五組最快），最後 10 個 epoch 的平均 Val F1 最高（<b>0.9915</b>）、平均 Val Loss 最低（<b>0.0229</b>），而且在偏移測試上拿到滿分 <b>1.0000</b>。比較之下，<code>E5</code> 在僅 42 萬參數的小模型上同時疊加 Dropout(0.3) 與 L2(1e-4) 並在第 66 epoch 提早停止，反而略微欠擬合（Val Loss = 0.01364）。</li>
+    <li><b>模型大小與參數量</b>：<code>E4</code> 僅 <b>421,990</b> 參數（<b>1.62 MB</b>），在輕量架構下兼顧高準確率與穩定泛化表現。</li>
+  </ul>
+</div>
+
+<h3>Overfitting / Generalization 診斷與錯誤分析</h3>
+<p>在潔淨驗證集（N=270）上 <b>E4</b> 並沒有出現誤判樣本（0 errors）；為了確認模型不是單純記住原始拍攝亮度與角度，我們另外用 <code>seed=42</code> 對驗證集做 ±15° 旋轉與 ±20% 亮度對比偏移測試（僅用於診斷，未參與訓練）：</p>
+<ul><li>最終選定模型 <b>E4</b> 於驗證集全數 270 張影像達成 0 筆誤判（100% 準確率）。</li></ul>
+<figure><img src='file:///D:/data/%E5%BD%B1%E5%83%8F%E8%AD%98%E5%88%A5%E6%9C%9F%E6%9C%AB%E5%A0%B1%E5%91%8A/workspace_outputs/stage1/figs/fig5_stage1_generalization.png' style='max-height:300px;' /><figcaption>圖 5：E1–E5 校準損失（Val Loss）與輕微偏移泛化診斷比較（Clean vs. Mild-Shift Probe）。</figcaption></figure>
+
+</body>
+</html>

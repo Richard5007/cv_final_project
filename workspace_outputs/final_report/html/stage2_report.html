@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<title>Team21 Stage 2 Report</title>
+<style>
+@page {
+  size: A4;
+  margin: 18mm 16mm 18mm 16mm;
+}
+* { box-sizing: border-box; }
+body {
+  font-family: "Microsoft JhengHei", "PingFang TC", "Noto Sans CJK TC", "Segoe UI", Arial, sans-serif;
+  color: #1f2937;
+  font-size: 9.8pt;
+  line-height: 1.62;
+  margin: 0;
+  padding: 0;
+}
+.report-header {
+  border-bottom: 2px solid #1e293b;
+  padding-bottom: 10px;
+  margin-bottom: 14px;
+}
+.report-header .course-tag {
+  font-size: 8.5pt;
+  color: #475569;
+  margin-bottom: 4px;
+}
+.report-header h1 {
+  margin: 0 0 6px 0;
+  font-size: 16.5pt;
+  font-weight: 700;
+  color: #0f172a;
+}
+.report-header .author-line {
+  font-size: 9pt;
+  color: #334155;
+  margin: 0;
+}
+.summary-strip {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 0 14px 0;
+  font-size: 8.8pt;
+}
+.summary-strip td {
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  padding: 6px 10px;
+  text-align: left;
+  width: 25%;
+}
+.summary-strip .lbl {
+  display: block;
+  font-size: 7.8pt;
+  color: #64748b;
+}
+.summary-strip .val {
+  display: block;
+  font-size: 10.2pt;
+  font-weight: 700;
+  color: #0f172a;
+  margin-top: 2px;
+}
+h2 {
+  font-size: 12.2pt;
+  color: #0f172a;
+  border-bottom: 1.5px solid #94a3b8;
+  padding-bottom: 3px;
+  margin: 15px 0 8px 0;
+  page-break-after: avoid;
+}
+h3 {
+  font-size: 10.5pt;
+  color: #1e293b;
+  margin: 11px 0 5px 0;
+  page-break-after: avoid;
+}
+p { margin: 5px 0 8px 0; text-align: justify; }
+ul, ol { margin: 4px 0 8px 0; padding-left: 20px; }
+li { margin-bottom: 4px; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 8px 0 12px 0;
+  font-size: 8.5pt;
+  page-break-inside: avoid;
+}
+table.allow-split {
+  page-break-inside: auto;
+}
+thead { display: table-header-group; }
+tr { page-break-inside: avoid; break-inside: avoid; }
+th, td {
+  border: 1px solid #cbd5e1;
+  padding: 5px 6px;
+  text-align: center;
+  vertical-align: middle;
+}
+th {
+  background: #f1f5f9;
+  color: #0f172a;
+  font-weight: 700;
+}
+td.left, th.left { text-align: left; }
+tr:nth-child(even) td { background: #fafafa; }
+tr.highlight td { background: #eef6ff !important; font-weight: 700; }
+.note-box {
+  background: #f8fafc;
+  border-left: 3.5px solid #475569;
+  padding: 8px 12px;
+  margin: 8px 0 12px 0;
+  page-break-inside: avoid;
+}
+figure {
+  margin: 8px 0 12px 0;
+  text-align: center;
+  page-break-inside: avoid;
+}
+figure img {
+  max-width: 100%;
+  height: auto;
+  border: 1px solid #e2e8f0;
+}
+figcaption {
+  font-size: 8.4pt;
+  color: #475569;
+  margin-top: 4px;
+}
+code {
+  font-family: Consolas, "Courier New", monospace;
+  background: #f1f5f9;
+  padding: 1px 4px;
+  border-radius: 2px;
+  font-size: 8.4pt;
+}
+.page-break { page-break-before: always; }
+.badge-pending {
+  display: inline-block;
+  background: #fef3c7;
+  color: #92400e;
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-weight: 700;
+  font-size: 8.2pt;
+}
+</style>
+</head>
+<body>
+
+<div class="report-header">
+  <div class="course-tag">影像識別期末專題報告｜FactoryVision Challenge — Stage 2</div>
+  <h1>Stage 2：遷移學習架構與微調策略比較報告</h1>
+  <p class="author-line">組別：Team21｜實驗設計：2 Architectures × 3 Strategies｜隨機種子：42</p>
+</div>
+
+<table class="summary-strip">
+  <tr>
+    <td><span class="lbl">最終選定架構</span><span class="val">MobileNetV3-Large</span></td>
+    <td><span class="lbl">微調策略</span><span class="val">Full Fine-tuning</span></td>
+    <td><span class="lbl">Clean Val Macro F1</span><span class="val">1.0000</span></td>
+    <td><span class="lbl">Local Robust Macro F1</span><span class="val">0.9938</span></td>
+  </tr>
+</table>
+
+<h2>1. 實驗架構矩陣與設計動機</h2>
+<p>Stage 2 希望把骨幹網路（Architecture）與微調策略（Fine-tuning Strategy）兩者的影響分開來看，所以我們選了兩個結構差異較大的預訓練模型家族，各自搭配三種微調方式做 <b>2 × 3 = 6 組</b>控制實驗：</p>
+<ul>
+  <li><b>DenseNet121</b>（<code>DenseNet121_Weights.IMAGENET1K_V1</code>）：透過密集連接把淺層紋理一路往後傳，理論上對表面細紋辨識很有幫助，但參數量與計算量較高。</li>
+  <li><b>MobileNetV3-Large</b>（<code>MobileNet_V3_Large_Weights.IMAGENET1K_V2</code>）：使用深度可分離卷積搭配 SE 注意力，模型小、參數量低，很適合邊緣產線部署。</li>
+  <li><b>三種微調策略</b>：
+    (1) <code>Feature Extraction</code>（凍結全部骨幹，只訓練分類頭，<code>lr=1e-3</code>）；
+    (2) <code>Partial Fine-tuning</code>（DenseNet121 解凍最後的 <code>denseblock4 + norm5 + classifier</code>；MobileNetV3-Large 解凍 <code>features[13:17] + classifier</code>；骨幹 <code>lr=3e-4</code>、Head <code>lr=1e-3</code>）；
+    (3) <code>Full Fine-tuning</code>（全網路解凍，採用差異學習率：骨幹 <code>lr=1.5e-4</code>、Head <code>lr=1e-3</code>）。</li>
+  <li><b>訓練與前處理一致性</b>：6 組實驗全部使用相同切分（Train 1,260 / Val 270）、<code>seed=42</code>、<code>RGB 224×224</code> ImageNet 標準化、<code>AdamW(weight_decay=1e-4)</code>、<code>CosineAnnealingLR(35 epochs)</code>、<code>Label Smoothing=0.05</code>，並統一在訓練資料增強加入模擬現場光照偏移、模糊、感測器雜訊與 JPEG 壓縮；推論時則嚴格使用單一固定前處理，不依路徑切換任何規則。</li>
+</ul>
+
+<h2>2. 2×3 公平比較結果：Standard 與 Local Robustness 壓力測試</h2>
+<p>針對常見的 <code>lighting</code>、<code>optical</code> 與 <code>sensor_compression</code> 干擾情境，我們用固定種子在驗證階段對 270 張驗證圖加上對應的合成干擾來做壓力測試（這些干擾版本不曾用來挑超參數，best epoch 一律以 Clean Val Macro F1 決定）：</p>
+<table>
+  <thead>
+    <tr>
+      <th>實驗</th><th class="left">Architecture</th><th class="left">Strategy</th>
+      <th>Clean<br>Acc</th><th>Clean<br>Prec</th><th>Clean<br>Rec</th><th>Clean<br>Macro F1</th>
+      <th>Lighting<br>F1</th><th>Optical<br>F1</th><th>Sensor/JPEG<br>F1</th><th>Local Robust<br>Macro F1</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td><b>E1</b></td><td class='left'>DenseNet121</td><td class='left'>Feature Extraction</td><td>0.9926</td><td>0.9926</td><td>0.9926</td><td><b>0.9926</b></td><td>0.9590</td><td>0.8816</td><td>0.8158</td><td><b>0.8855</b></td></tr><tr><td><b>E2</b></td><td class='left'>DenseNet121</td><td class='left'>Partial Fine-tuning</td><td>1.0000</td><td>1.0000</td><td>1.0000</td><td><b>1.0000</b></td><td>0.9889</td><td>0.9738</td><td>0.9815</td><td><b>0.9814</b></td></tr><tr><td><b>E3</b></td><td class='left'>DenseNet121</td><td class='left'>Full Fine-tuning</td><td>1.0000</td><td>1.0000</td><td>1.0000</td><td><b>1.0000</b></td><td>0.9814</td><td>0.9926</td><td>0.9963</td><td><b>0.9901</b></td></tr><tr><td><b>E4</b></td><td class='left'>MobileNetV3-Large</td><td class='left'>Feature Extraction</td><td>1.0000</td><td>1.0000</td><td>1.0000</td><td><b>1.0000</b></td><td>0.9778</td><td>0.9550</td><td>0.9112</td><td><b>0.9480</b></td></tr><tr><td><b>E5</b></td><td class='left'>MobileNetV3-Large</td><td class='left'>Partial Fine-tuning</td><td>1.0000</td><td>1.0000</td><td>1.0000</td><td><b>1.0000</b></td><td>0.9815</td><td>0.9926</td><td>0.9521</td><td><b>0.9754</b></td></tr><tr class='highlight'><td><b>E6</b></td><td class='left'>MobileNetV3-Large</td><td class='left'>Full Fine-tuning</td><td>1.0000</td><td>1.0000</td><td>1.0000</td><td><b>1.0000</b></td><td>0.9852</td><td>1.0000</td><td>0.9963</td><td><b>0.9938</b></td></tr>
+  </tbody>
+</table>
+
+<figure><img src='file:///D:/data/%E5%BD%B1%E5%83%8F%E8%AD%98%E5%88%A5%E6%9C%9F%E6%9C%AB%E5%A0%B1%E5%91%8A/workspace_outputs/stage2/figs/fig2_stage2_robustness_bar.png' style='max-height:270px;' /><figcaption>圖 1：6 組模型於 Clean Validation 與三種局部干擾測試（Lighting / Optical / Sensor-JPEG）之 Macro F1 對照。</figcaption></figure>
+<figure><img src='file:///D:/data/%E5%BD%B1%E5%83%8F%E8%AD%98%E5%88%A5%E6%9C%9F%E6%9C%AB%E5%A0%B1%E5%91%8A/workspace_outputs/stage2/figs/fig5_stage2_corruption_strip.png' style='max-height:180px;' /><figcaption>圖 2：本地 Robustness 壓力測試合成干擾範例（僅於驗證評估時產生）。</figcaption></figure>
+
+<h2>3. 參數規模、凍結層明細與收斂曲線</h2>
+<table class="allow-split">
+  <thead>
+    <tr>
+      <th>實驗</th><th class="left">模型組合</th><th>Total Params</th><th>Trainable Params</th>
+      <th>檔案大小</th><th class="left">Frozen Layers</th><th class="left">Trainable Layers</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td><b>E1</b></td><td class='left'>DenseNet121 / Feature Extraction</td><td>6,960,006</td><td>6,150 (0.1%)</td><td>27.09 MB</td><td class='left'><code>features.conv0, features.norm0, features.relu0, features.pool0, features.denseblock1, features.transition1, features.denseblock2, features.transition2, features.denseblock3, features.transition3, features.denseblock4, features.norm5</code></td><td class='left'><code>classifier</code></td></tr><tr><td><b>E2</b></td><td class='left'>DenseNet121 / Partial Fine-tuning</td><td>6,960,006</td><td>2,166,278 (31.1%)</td><td>27.09 MB</td><td class='left'><code>features.conv0, features.norm0, features.relu0, features.pool0, features.denseblock1, features.transition1, features.denseblock2, features.transition2, features.denseblock3, features.transition3</code></td><td class='left'><code>features.denseblock4, features.norm5, classifier</code></td></tr><tr><td><b>E3</b></td><td class='left'>DenseNet121 / Full Fine-tuning</td><td>6,960,006</td><td>6,960,006 (100.0%)</td><td>27.09 MB</td><td class='left'><code>features.relu0, features.pool0</code></td><td class='left'><code>features.conv0, features.norm0, features.denseblock1, features.transition1, features.denseblock2, features.transition2, features.denseblock3, features.transition3, features.denseblock4, features.norm5, classifier</code></td></tr><tr><td><b>E4</b></td><td class='left'>MobileNetV3-Large / Feature Extraction</td><td>4,209,718</td><td>1,237,766 (29.4%)</td><td>16.24 MB</td><td class='left'><code>features[0], features[1], features[2], features[3], features[4], features[5], features[6], features[7], features[8], features[9], features[10], features[11], features[12], features[13], features[14], features[15], features[16]</code></td><td class='left'><code>classifier</code></td></tr><tr><td><b>E5</b></td><td class='left'>MobileNetV3-Large / Partial Fine-tuning</td><td>4,209,718</td><td>3,417,230 (81.2%)</td><td>16.24 MB</td><td class='left'><code>features[0], features[1], features[2], features[3], features[4], features[5], features[6], features[7], features[8], features[9], features[10], features[11], features[12]</code></td><td class='left'><code>features[13], features[14], features[15], features[16], classifier</code></td></tr><tr class='highlight'><td><b>E6</b></td><td class='left'>MobileNetV3-Large / Full Fine-tuning</td><td>4,209,718</td><td>4,209,718 (100.0%)</td><td>16.24 MB</td><td class='left'><code>None (All Trainable)</code></td><td class='left'><code>features[0], features[1], features[2], features[3], features[4], features[5], features[6], features[7], features[8], features[9], features[10], features[11], features[12], features[13], features[14], features[15], features[16], classifier</code></td></tr>
+  </tbody>
+</table>
+
+<div class="page-break"></div>
+
+<figure><img src='file:///D:/data/%E5%BD%B1%E5%83%8F%E8%AD%98%E5%88%A5%E6%9C%9F%E6%9C%AB%E5%A0%B1%E5%91%8A/workspace_outputs/stage2/figs/fig1_stage2_curves.png' style='max-height:420px;' /><figcaption>圖 3：DenseNet121（上）與 MobileNetV3-Large（下）於三種微調策略下之訓練／驗證收斂曲線。</figcaption></figure>
+
+<div class="page-break"></div>
+
+<h2>4. 部署權衡分析、混淆矩陣與 Final Model Decision</h2>
+<figure><img src='file:///D:/data/%E5%BD%B1%E5%83%8F%E8%AD%98%E5%88%A5%E6%9C%9F%E6%9C%AB%E5%A0%B1%E5%91%8A/workspace_outputs/stage2/figs/fig3_stage2_deployment_tradeoff.png' style='max-height:320px;' /><figcaption>圖 4：模型參數量、檔案大小（氣泡面積）與強健性 Macro F1 之工程權衡分佈圖。</figcaption></figure>
+<figure><img src='file:///D:/data/%E5%BD%B1%E5%83%8F%E8%AD%98%E5%88%A5%E6%9C%9F%E6%9C%AB%E5%A0%B1%E5%91%8A/workspace_outputs/stage2/figs/fig4_stage2_final_cm.png' style='max-height:270px;' /><figcaption>圖 5：最終選定模型 (E6) 於 Clean Validation (N=270) 與彙總 Robustness 測試 (N=810) 之混淆矩陣。</figcaption></figure>
+
+<div class="note-box">
+  <b>Stage 2 選模結論（選定 E6: MobileNetV3-Large + Full Fine-tuning）</b>：
+  <ul>
+    <li><b>凍結骨幹 vs. 微調的差異</b>：雖然 DenseNet121 與 MobileNetV3-Large 在潔淨資料上只靠 <code>Feature Extraction</code> 就能拿到 0.9926 與 1.0000，但在本地干擾測試下差距立刻拉開——特別是 <code>DenseNet121 FE (E1)</code> 在 <code>Sensor/JPEG</code> 降到 <code>0.8158</code>（Robust 平均 <code>0.8855</code>）。原因在於 ImageNet 預訓練的淺層濾波器對高頻壓縮失真很敏感，必須透過微調讓整個網路適應鋼材紋理域。</li>
+    <li><b>為什麼選 E6 而不是 DenseNet121 Full FT (0.9901)？</b> <code>E6</code>（MobileNetV3-Large Full Fine-tuning）不僅在 Local Robust Macro F1 拿到最高分（<b>0.9938</b>，810 張干擾測試僅 5 筆誤判），模型檔案也只有 <b>16.24 MB</b>（DenseNet121 為 27.09 MB），參數量也僅約 DenseNet121 的 60%（<b>4,209,718</b>）。在精度、強健性與部署成本三方面都更划算。</li>
+    <li><b>離線驗證</b>：<code>stage2_inference.py</code> 固定以 <code>pretrained=False</code> 建構模型並從本地 <code>stage2_model.pth</code> 載入權重，已在外部工作目錄驗證通過。</li>
+  </ul>
+</div>
+
+</body>
+</html>

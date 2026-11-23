@@ -1,0 +1,21 @@
+{
+  "team_id": "Team21",
+  "notes": "Fill in official TA Hidden Benchmark scores once released, then run: python scripts/rebuild_final_report.py",
+  "stage1": {
+    "hidden_macro_f1": null,
+    "rubric_points_max10": null
+  },
+  "stage2": {
+    "hidden_standard_macro_f1": null,
+    "hidden_lighting_macro_f1": null,
+    "hidden_optical_macro_f1": null,
+    "hidden_sensor_compression_macro_f1": null,
+    "hidden_robust_macro_f1": null,
+    "standard_points_max6": null,
+    "robust_points_max6": null
+  },
+  "stage3": {
+    "hidden_map50": null,
+    "rubric_points_max12": null
+  }
+}

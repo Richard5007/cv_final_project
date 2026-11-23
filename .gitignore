@@ -1,0 +1,27 @@
+# Datasets & Archives
+data/
+*.zip
+
+# Model Weights & Checkpoints (>100MB or intermediate)
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+*.onnx
+
+# Intermediate training & validation scratch directories
+workspace_outputs/*/checkpoints/
+workspace_outputs/*/yolo_runs/
+workspace_outputs/*/pretrained/
+workspace_outputs/val_check/
+runs/
+
+# Python caches
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# OS / IDE
+.DS_Store
+Thumbs.db

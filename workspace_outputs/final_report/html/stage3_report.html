@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<title>Team21 Stage 3 Report</title>
+<style>
+@page {
+  size: A4;
+  margin: 18mm 16mm 18mm 16mm;
+}
+* { box-sizing: border-box; }
+body {
+  font-family: "Microsoft JhengHei", "PingFang TC", "Noto Sans CJK TC", "Segoe UI", Arial, sans-serif;
+  color: #1f2937;
+  font-size: 9.8pt;
+  line-height: 1.62;
+  margin: 0;
+  padding: 0;
+}
+.report-header {
+  border-bottom: 2px solid #1e293b;
+  padding-bottom: 10px;
+  margin-bottom: 14px;
+}
+.report-header .course-tag {
+  font-size: 8.5pt;
+  color: #475569;
+  margin-bottom: 4px;
+}
+.report-header h1 {
+  margin: 0 0 6px 0;
+  font-size: 16.5pt;
+  font-weight: 700;
+  color: #0f172a;
+}
+.report-header .author-line {
+  font-size: 9pt;
+  color: #334155;
+  margin: 0;
+}
+.summary-strip {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 0 14px 0;
+  font-size: 8.8pt;
+}
+.summary-strip td {
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  padding: 6px 10px;
+  text-align: left;
+  width: 25%;
+}
+.summary-strip .lbl {
+  display: block;
+  font-size: 7.8pt;
+  color: #64748b;
+}
+.summary-strip .val {
+  display: block;
+  font-size: 10.2pt;
+  font-weight: 700;
+  color: #0f172a;
+  margin-top: 2px;
+}
+h2 {
+  font-size: 12.2pt;
+  color: #0f172a;
+  border-bottom: 1.5px solid #94a3b8;
+  padding-bottom: 3px;
+  margin: 15px 0 8px 0;
+  page-break-after: avoid;
+}
+h3 {
+  font-size: 10.5pt;
+  color: #1e293b;
+  margin: 11px 0 5px 0;
+  page-break-after: avoid;
+}
+p { margin: 5px 0 8px 0; text-align: justify; }
+ul, ol { margin: 4px 0 8px 0; padding-left: 20px; }
+li { margin-bottom: 4px; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 8px 0 12px 0;
+  font-size: 8.5pt;
+  page-break-inside: avoid;
+}
+table.allow-split {
+  page-break-inside: auto;
+}
+thead { display: table-header-group; }
+tr { page-break-inside: avoid; break-inside: avoid; }
+th, td {
+  border: 1px solid #cbd5e1;
+  padding: 5px 6px;
+  text-align: center;
+  vertical-align: middle;
+}
+th {
+  background: #f1f5f9;
+  color: #0f172a;
+  font-weight: 700;
+}
+td.left, th.left { text-align: left; }
+tr:nth-child(even) td { background: #fafafa; }
+tr.highlight td { background: #eef6ff !important; font-weight: 700; }
+.note-box {
+  background: #f8fafc;
+  border-left: 3.5px solid #475569;
+  padding: 8px 12px;
+  margin: 8px 0 12px 0;
+  page-break-inside: avoid;
+}
+figure {
+  margin: 8px 0 12px 0;
+  text-align: center;
+  page-break-inside: avoid;
+}
+figure img {
+  max-width: 100%;
+  height: auto;
+  border: 1px solid #e2e8f0;
+}
+figcaption {
+  font-size: 8.4pt;
+  color: #475569;
+  margin-top: 4px;
+}
+code {
+  font-family: Consolas, "Courier New", monospace;
+  background: #f1f5f9;
+  padding: 1px 4px;
+  border-radius: 2px;
+  font-size: 8.4pt;
+}
+.page-break { page-break-before: always; }
+.badge-pending {
+  display: inline-block;
+  background: #fef3c7;
+  color: #92400e;
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-weight: 700;
+  font-size: 8.2pt;
+}
+</style>
+</head>
+<body>
+
+<div class="report-header">
+  <div class="course-tag">影像識別期末專題報告｜FactoryVision Challenge — Stage 3</div>
+  <h1>Stage 3：鋼材表面瑕疵 Object Detection 實驗報告</h1>
+  <p class="author-line">組別：Team21｜模型比較：YOLO11s / YOLO11m vs. Faster R-CNN R50-FPN-v2｜隨機種子：42</p>
+</div>
+
+<table class="summary-strip">
+  <tr>
+    <td><span class="lbl">選定 Detector</span><span class="val">Faster R-CNN ResNet50-FPN-v2</span></td>
+    <td><span class="lbl">Val mAP@0.5 (c=0.01)</span><span class="val">0.7866</span></td>
+    <td><span class="lbl">Val P / R (Op c=0.25)</span><span class="val">0.504 / 0.853</span></td>
+    <td><span class="lbl">參數量 / 檔案大小</span><span class="val">43,281,778 / 165.5 MB</span></td>
+  </tr>
+</table>
+
+<h2>1. 檢測器架構設計與訓練設定</h2>
+<p>Stage 3 將問題從「整張圖是什麼瑕疵」延伸到「每個瑕疵在哪裡」（Train=1,260 / Validation=270，驗證集共 641 個標註框）。實作時我們先注意到 VOC XML 標註把 <code>rolled_in_scale</code> 寫成帶連字號的 <code>rolled-in_scale</code>，因此在資料讀取與評估器中統一做了名稱正規化。為了比較單階段與雙階段檢測器的差異，我們在相同切分與 <code>seed=42</code> 下訓練了三組模型：</p>
+<ul>
+  <li><b>YOLO11s 與 YOLO11m（單階段 Anchor-free）</b>：使用 Ultralytics COCO 預訓練權重，將 <code>200×200</code> 影像上採樣至 <code>imgsz=640</code> 訓練 100 epochs（<code>fliplr=0.5, flipud=0.5, mosaic=1.0, close_mosaic=15, hsv_v=0.3, scale=0.4, patience=25</code>）。</li>
+  <li><b>Faster R-CNN ResNet50-FPN-v2（雙階段 Anchor-based）</b>：使用 Torchvision COCO_V1 預訓練權重，透過 FPN 多尺度金字塔（P2–P6）搭配 RPN 與 RoIAlign 進行兩階段邊界修正，設定 <code>min_size=600, max_size=800</code>、<code>AdamW(lr=1e-4, weight_decay=1e-4)</code>、<code>CosineAnnealingLR(25 epochs)</code> 與混合精度訓練。</li>
+</ul>
+
+<h2>2. 檢測器效能比較（依 Slide-31 Pascal VOC 2010+ 定義）</h2>
+<p>為避免不同套件內建 mAP 算式不一致，下表所有數據皆由我們依投影片第 31 頁規格獨立實作的評估程式（<code>IoU ≥ 0.5</code> 貪婪一對一匹配、Pascal VOC 2010+ 全點插值 AP）統一計算：</p>
+<table>
+  <thead>
+    <tr>
+      <th class="left">Detector</th><th>Params</th><th>Size</th>
+      <th>mAP@0.5<br>(conf=0.01)</th><th>mAP@0.5<br>(conf=0.25)</th>
+      <th>Precision<br>(conf=0.25)</th><th>Recall<br>(conf=0.25)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td class='left'><b>YOLO11S</b></td><td>9,430,114</td><td>18.3 MB</td><td><b>0.7413</b></td><td>0.6313</td><td>0.7095</td><td>0.6973</td></tr><tr><td class='left'><b>YOLO11M</b></td><td>20,057,634</td><td>38.7 MB</td><td><b>0.7603</b></td><td>0.6474</td><td>0.7417</td><td>0.6989</td></tr><tr class='highlight'><td class='left'><b>Faster R-CNN ResNet50-FPN-v2</b></td><td>43,281,778</td><td>165.5 MB</td><td><b>0.7866</b></td><td>0.7574</td><td>0.5041</td><td>0.8534</td></tr>
+  </tbody>
+</table>
+
+<figure><img src='file:///D:/data/%E5%BD%B1%E5%83%8F%E8%AD%98%E5%88%A5%E6%9C%9F%E6%9C%AB%E5%A0%B1%E5%91%8A/workspace_outputs/stage3/figs/fig1_stage3_detector_comparison.png' style='max-height:290px;' /><figcaption>圖 1：YOLO11s、YOLO11m 與 Faster R-CNN R50-FPN-v2 於完整 PR 曲線下（conf=0.01）之逐類 AP@0.5 與整體 mAP@0.5 比較。</figcaption></figure>
+<figure><img src='file:///D:/data/%E5%BD%B1%E5%83%8F%E8%AD%98%E5%88%A5%E6%9C%9F%E6%9C%AB%E5%A0%B1%E5%91%8A/workspace_outputs/stage3/figs/fig3_stage3_training_curves.png' style='max-height:260px;' /><figcaption>圖 2：YOLO11s/m 與 Faster R-CNN 之訓練收斂與驗證 mAP@0.5 曲線。</figcaption></figure>
+
+<div class="page-break"></div>
+
+<h2>3. IoU、Confidence Threshold、NMS 機制與超參數敏感度分析</h2>
+<ul>
+  <li><b>IoU（Intersection over Union = 0.5）</b>：定義預測框與 Ground Truth 之重疊比例。<code>IoU ≥ 0.5</code> 為 True Positive 門檻，類別錯誤、<code>IoU &lt; 0.5</code> 或同一 GT 之重複預測皆計為 False Positive。</li>
+  <li><b>Confidence Threshold（提交設定 <code>0.01</code> vs. 產線警報 <code>0.25–0.50</code>）</b>：由於 Slide-31 Pascal VOC <code>mAP@0.5</code> 積分整條 Precision-Recall 曲線，過高門檻會提前截斷高召回尾部而壓低 AP；因此正式 <code>stage3_detect.py</code> 採用 <code>conf = 0.01</code>（平均每張 <b>12.26</b> 框，遠低於 100 框上限），完整保留 PR 面積達成 <b>mAP@0.5 = 0.7866</b>（Recall = <b>0.9454</b>，Precision = <b>0.1831</b>）。於實際產線告警與視覺化時，則將顯示／警報門檻調高至 <code>conf = 0.25–0.50</code>，使 Precision 由 0.183 大幅拉升至 <b>0.504–0.617</b>（F1 = <b>0.634–0.703</b>）。</li>
+  <li><b>NMS IoU Threshold（選定 <code>0.5</code>）與 Anchor vs. Anchor-free 機制比較</b>：單階段 <code>YOLO11</code> 採 Anchor-free DFL 頭直接回歸中心到四邊距離，省去手動 Anchor 尺度調校並達成極快推論；雙階段 <code>Faster R-CNN ResNet50-FPN-v2</code> 則透過多尺度 RPN Anchors 先過濾前景候選框再經 RoIAlign 進行第二次精細邊界回歸，於瀰漫弱紋理類別上展現顯著優勢（<code>crazing</code> AP = <b>0.5093</b> vs. YOLO11s 0.3797；<code>rolled_in_scale</code> AP = <b>0.6692</b> vs. YOLO11m 0.5961），並以 <code>NMS IoU = 0.5</code> 抑制同一目標冗餘框。</li>
+</ul>
+
+<div style="display:grid; grid-template-columns: 1.15fr 1fr; gap:10px; align-items:start;">
+  <div>
+    <table>
+      <thead>
+        <tr><th>Conf</th><th>mAP@0.5</th><th>Precision</th><th>Recall</th><th>F1</th><th>Avg Dets/Img</th></tr>
+      </thead>
+      <tbody><tr><td>0.005</td><td><b>0.7885</b></td><td>0.1376</td><td>0.9563</td><td>0.2406</td><td>16.50</td></tr><tr class='highlight'><td>0.01</td><td><b>0.7866</b></td><td>0.1831</td><td>0.9454</td><td>0.3068</td><td>12.26</td></tr><tr><td>0.03</td><td><b>0.7829</b></td><td>0.2658</td><td>0.9298</td><td>0.4135</td><td>8.30</td></tr><tr><td>0.05</td><td><b>0.7789</b></td><td>0.3139</td><td>0.9142</td><td>0.4673</td><td>6.91</td></tr><tr><td>0.1</td><td><b>0.7714</b></td><td>0.3884</td><td>0.8908</td><td>0.5410</td><td>5.44</td></tr><tr><td>0.15</td><td><b>0.7666</b></td><td>0.4429</td><td>0.8768</td><td>0.5885</td><td>4.70</td></tr><tr><td>0.2</td><td><b>0.7623</b></td><td>0.4793</td><td>0.8658</td><td>0.6170</td><td>4.29</td></tr><tr><td>0.25</td><td><b>0.7574</b></td><td>0.5041</td><td>0.8534</td><td>0.6338</td><td>4.02</td></tr><tr><td>0.3</td><td><b>0.7552</b></td><td>0.5287</td><td>0.8487</td><td>0.6515</td><td>3.81</td></tr><tr><td>0.4</td><td><b>0.7489</b></td><td>0.5698</td><td>0.8346</td><td>0.6772</td><td>3.48</td></tr><tr><td>0.5</td><td><b>0.7410</b></td><td>0.6175</td><td>0.8159</td><td>0.7030</td><td>3.14</td></tr></tbody>
+    </table>
+  </div>
+  <div>
+    <table>
+      <thead>
+        <tr><th class="left">Class (Final @ c=0.01)</th><th>GT</th><th>TP</th><th>FP</th><th>FN</th><th>AP@0.5</th></tr>
+      </thead>
+      <tbody><tr><td class='left'><code>crazing</code></td><td>102</td><td>93</td><td>798</td><td>9</td><td><b>0.5093</b></td></tr><tr><td class='left'><code>inclusion</code></td><td>149</td><td>139</td><td>363</td><td>10</td><td><b>0.7886</b></td></tr><tr><td class='left'><code>patches</code></td><td>152</td><td>149</td><td>295</td><td>3</td><td><b>0.9370</b></td></tr><tr><td class='left'><code>pitted_surface</code></td><td>66</td><td>63</td><td>612</td><td>3</td><td><b>0.8715</b></td></tr><tr><td class='left'><code>rolled_in_scale</code></td><td>93</td><td>84</td><td>436</td><td>9</td><td><b>0.6692</b></td></tr><tr><td class='left'><code>scratches</code></td><td>79</td><td>78</td><td>199</td><td>1</td><td><b>0.9442</b></td></tr></tbody>
+    </table>
+  </div>
+</div>
+
+<figure><img src='file:///D:/data/%E5%BD%B1%E5%83%8F%E8%AD%98%E5%88%A5%E6%9C%9F%E6%9C%AB%E5%A0%B1%E5%91%8A/workspace_outputs/stage3/figs/fig2_stage3_pr_and_threshold.png' style='max-height:275px;' /><figcaption>圖 3：(左) Confidence Threshold 對 Precision/Recall/F1/mAP@0.5 之影響；(右) 最終選定模型各類別 Precision-Recall 曲線。</figcaption></figure>
+
+<div class="page-break"></div>
+
+<h2>4. Validation 偵測結果視覺化（12 張 Ground Truth vs. Prediction 對照）</h2>
+<figure><img src='file:///D:/data/%E5%BD%B1%E5%83%8F%E8%AD%98%E5%88%A5%E6%9C%9F%E6%9C%AB%E5%A0%B1%E5%91%8A/workspace_outputs/stage3/figs/fig4_stage3_vis_part1.png' style='max-height:430px;' /><figcaption>圖 4：Validation 偵測結果視覺化（Part 1，共 6 張，含多類別共存影像；實線=GT、虛線=Prediction @ 顯示門檻 conf≥0.25）。</figcaption></figure>
+<figure><img src='file:///D:/data/%E5%BD%B1%E5%83%8F%E8%AD%98%E5%88%A5%E6%9C%9F%E6%9C%AB%E5%A0%B1%E5%91%8A/workspace_outputs/stage3/figs/fig4_stage3_vis_part2.png' style='max-height:430px;' /><figcaption>圖 5：Validation 偵測結果視覺化（Part 2，共 6 張，涵蓋所有 6 種鋼材瑕疵類別；@ 顯示門檻 conf≥0.25）。</figcaption></figure>
+
+<div class="page-break"></div>
+
+<h2>5. Failure Analysis：錯誤案例與 Slide-22 核心工程問題回答</h2>
+<figure><img src='file:///D:/data/%E5%BD%B1%E5%83%8F%E8%AD%98%E5%88%A5%E6%9C%9F%E6%9C%AB%E5%A0%B1%E5%91%8A/workspace_outputs/stage3/figs/fig5_stage3_failure_cases.png' style='max-height:470px;' /><figcaption>圖 6：6 個代表性失效案例（於操作門檻 conf≥0.25 抽取 False Positive、False Negative、Poor Localization 各 2 例）。</figcaption></figure>
+
+<table>
+  <thead>
+    <tr><th>失效類型</th><th>影像 ID</th><th class="left">實際現象數據 (conf≥0.25)</th><th class="left">可能成因診斷</th></tr>
+  </thead>
+  <tbody><tr><td><b>False Positive (誤檢)</b></td><td><code>VAL_0250</code></td><td class='left'>預測為 <code>scratches</code> (conf=0.99)，與最近 GT (<code>scratches</code>) 之 IoU 僅 0.00</td><td class='left'>細微金屬反光紋理被誤觸發，或重疊缺陷造成跨類混淆/重複預測</td></tr><tr><td><b>False Positive (誤檢)</b></td><td><code>VAL_0254</code></td><td class='left'>預測為 <code>scratches</code> (conf=0.99)，與最近 GT (<code>scratches</code>) 之 IoU 僅 0.00</td><td class='left'>細微金屬反光紋理被誤觸發，或重疊缺陷造成跨類混淆/重複預測</td></tr><tr><td><b>False Negative (漏檢)</b></td><td><code>VAL_0062</code></td><td class='left'>漏檢 <code>inclusion</code>（GT 框面積 242 px²）</td><td class='left'>目標面積狹小或邊界對比度低，與背景滾軋紋理融為一體</td></tr><tr><td><b>False Negative (漏檢)</b></td><td><code>VAL_0067</code></td><td class='left'>漏檢 <code>inclusion</code>（GT 框面積 308 px²）</td><td class='left'>目標面積狹小或邊界對比度低，與背景滾軋紋理融為一體</td></tr><tr><td><b>Poor Localization (IoU<0.5)</b></td><td><code>VAL_0126</code></td><td class='left'>類別 <code>patches</code> (conf=1.00) 正確，但 IoU=0.463 &lt; 0.50</td><td class='left'>長條形或散佈型缺陷邊界模糊，預測框偏移或涵蓋範圍過大/過小</td></tr><tr><td><b>Poor Localization (IoU<0.5)</b></td><td><code>VAL_0173</code></td><td class='left'>類別 <code>pitted_surface</code> (conf=1.00) 正確，但 IoU=0.500 &lt; 0.50</td><td class='left'>長條形或散佈型缺陷邊界模糊，預測框偏移或涵蓋範圍過大/過小</td></tr></tbody>
+</table>
+
+<div class="note-box">
+  <b>Slide-22 核心問題回答與工程討論</b>：
+  <ol>
+    <li><b>模型漏掉了哪些 defect？與物件大小、紋理或背景相似有關嗎？</b> 漏檢（FN）主要出現在面積偏小的 <code>inclusion</code>（驗證集中位寬只有 23 px，例如 <code>VAL_0067</code> 角落 308 px² 的小夾雜）以及對比度很弱的 <code>crazing</code>／<code>rolled_in_scale</code>，當瑕疵本身幾乎融入熱軋背景紋理時特別容易漏掉。</li>
+    <li><b>Bounding Box 為什麼偏移或過大？IoU 不足的原因是什麼？</b> 像是 <code>pitted_surface</code> 與 <code>crazing</code> 屬於大面積散佈型紋理，標註框邊界本身就不像剛體物件那麼明確。從 <code>VAL_0173</code> 可以直接看到，Ground Truth 標成左右兩個相鄰的 <code>pitted_surface</code> 框，但模型把它們合併預測成一個涵蓋整張圖的大框（<code>IoU = 0.500</code> 未達標準），這類合併或只框到核心區域的情況是 Poor Localization 的主因。</li>
+    <li><b>調整 Confidence Threshold 後，Precision 與 Recall 如何改變？</b> Threshold 從 0.01 提高到 0.50 時，Precision 一路從 <b>0.183</b> 升到 <b>0.617</b>，Recall 則從 <b>0.945</b> 降到 <b>0.816</b>。若產線擔心漏檢，threshold 設在 <code>0.20–0.25</code> 比較合適；若要減少誤報則可拉高到 <code>0.40–0.50</code>。</li>
+    <li><b>模型複雜度與精度的取捨如何？更大的 Detector 是否真的值得？</b> 這裡有很明顯的取捨：<code>Faster R-CNN R50-FPN-v2</code> 雖然拿到最高的 <b>mAP@0.5 = 0.7866</b>，但參數量達 <b>43,281,778</b>（權重 <b>165.5 MB</b>），比較適合高算力、重視極致召回率的品管複檢站；若產線端受限於記憶體與硬體資源，改用 <code>YOLO11m</code>（<b>20,057,634</b> 參數 / <b>38.7 MB</b>）或 <code>YOLO11s</code>（<b>9,430,114</b> 參數 / <b>18.3 MB</b>）會輕量許多。另外也觀察到在 <code>VAL_0250</code> 等案例中，有些所謂 False Positive 其實是鋼板上原本就存在、但未標註到的細微刮痕。</li>
+    <li><b>若部署到工廠，你會使用這個 Detector 嗎？為什麼？</b> <b>會，但會依產線工位做搭配。</b> 因為單標籤分類沒辦法處理一張圖出現多種瑕疵的情況（本資料集共有 104 張複合瑕疵圖），Detector 才能同時回答「是什麼」跟「在哪裡」。精檢站用 <code>Faster R-CNN R50-FPN-v2</code> 確保 <code>crazing</code> 與 <code>rolled_in_scale</code> 不漏接；資源受限的邊緣工位則可部署輕量的 <code>YOLO11m</code>。</li>
+  </ol>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,30 @@
+{
+  "team_id": "Team21",
+  "stage": 1,
+  "model_name": "SteelDefectCNN_E4",
+  "input_size": [
+    1,
+    200,
+    200
+  ],
+  "class_order": [
+    "crazing",
+    "inclusion",
+    "patches",
+    "pitted_surface",
+    "rolled_in_scale",
+    "scratches"
+  ],
+  "normalization_mean": [
+    0.5071
+  ],
+  "normalization_std": [
+    0.2132
+  ],
+  "seed": 42,
+  "improvement_methods": [
+    "Batch Normalization",
+    "Data Augmentation"
+  ],
+  "checkpoint_file": "stage1_model.pth"
+}
